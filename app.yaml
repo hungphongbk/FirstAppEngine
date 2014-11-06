@@ -10,8 +10,12 @@ handlers:
   static_files: index.html
   upload: index.html
 
-- url: /stuinfo
+- url: /bkstuinfo
   script: bk.stuinfo.app
+
+- url: /bkstuinfo/.*
+  script: bk.stuinfo.app
+
 
 libraries:
 - name: webapp2

@@ -1,3 +1,4 @@
+import threading
 import urllib
 import datetime
 
@@ -17,10 +18,18 @@ def sem_list(url):
     return [e.get('value') for e in htm.xpath('//select[@name="HOC_KY"]/option')]
 
 
-class _ScheduleList(list):
+class _ScheduleList(threading.Thread):
+    def run(self):
+        self.__download(self.__mssv, self.hoc_ki)
+
     __tags = ['code', 'name', 'group', 'day', 'period', 'room', 'day2', 'period2', 'room2']
 
-    def download(self, mssv, hoc_ki):
+    def __init__(self, mssv, hoc_ki):
+        threading.Thread.__init__(self)
+        self.__mssv = mssv
+        self.hoc_ki = hoc_ki
+
+    def __download(self, mssv, hoc_ki):
         def make_item_from_elem(_elem):
             item = dict()
             pre = zip(_ScheduleList.__tags, [i for i in _elem.itertext()])
@@ -38,8 +47,7 @@ class _ScheduleList(list):
             data = send_post_request(url, form_data)
             htm = html.fromstring(data)
             elems = htm.xpath('//table[@width="100%" and contains(.,"MH")]//tr[position()>1]')
-            for elem in elems:
-                self.append(make_item_from_elem(elem))
+            self.details = [make_item_from_elem(elem) for elem in elems]
         except BKException, e:
             raise e
 
@@ -56,19 +64,31 @@ class ScheduleList:
     def __download(self, mssv):
         url = u'http://www.aao.hcmut.edu.vn/v_old/php/aao_tkb.php?goto='
         try:
-            self.list = dict()
             elems = sem_list(url)
-            for e in elems:
-                sem = _ScheduleList()
-                sem.download(mssv, e)
-                if len(sem) == 0:
-                    break
-                self.list.update({e: sem})
+            self.details = [_ScheduleList(mssv, e) for e in elems]
+            # for e in elems:
+            #    sem = _ScheduleList()
+            #    sem.download(mssv, e)
+            #    if len(sem) == 0:
+            #        break
+            #    self.list.update({e: sem})
+            for t in self.details:
+                t.start()
+            for t in self.details:
+                t.join()
         except BKException, e:
             raise e
 
 
-class _ExamList(list):
+class _ExamList(threading.Thread):
+    def __init__(self, mssv, hoc_ki):
+        threading.Thread.__init__(self)
+        self.__mssv = mssv
+        self.hoc_ki = hoc_ki
+
+    def run(self):
+        super(_ExamList, self).run()
+
     __tags = ['code', 'name', 'group', 'daygk', 'timegk', 'roomgk', 'dayck', 'timeck', 'roomck']
 
     def download(self, mssv, hoc_ki):
@@ -86,8 +106,7 @@ class _ExamList(list):
             data = send_post_request(url, form_data)
             htm = html.fromstring(data)
             elems = htm.xpath('//table[@width="100%" and contains(.,"MH")]//tr[position()>2]')
-            for elem in elems:
-                self.append(make_item_from_elem(elem))
+            self.details = [make_item_from_elem(elem) for elem in elems]
         except BKException, e:
             raise e
 
@@ -106,11 +125,10 @@ class ExamList:
         try:
             self.list = dict()
             elems = sem_list(url)
-            for e in elems:
-                sem = _ExamList()
-                sem.download(mssv, e)
-                if len(sem) == 0:
-                    break
-                self.list.update({e: sem})
+            self.details = [_ScheduleList(mssv, e) for e in elems]
+            for t in self.details:
+                t.start()
+            for t in self.details:
+                t.join()
         except BKException, e:
             raise e

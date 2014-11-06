@@ -3,12 +3,135 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>First WebApp Engine</title>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 </head>
 <body>
-    <form action="/stuinfo" method="post">
-        <p>Please input your username: </p>
-        <input type="text" name="mssv"/>
-        <input type="submit" value="Submit"/>
-    </form>
+    <style>
+        html,body{
+            height:100%;
+            margin:0;
+            padding:0;
+            white-space: nowrap;
+        }
+        div.panel{
+            float:left;
+            height:100%;
+        }
+        div#leftPanel{
+            width:25%;
+            background: #eeeeee;
+        }
+        div#rightPanel{
+            width:75%;
+        }
+        p.form-title {
+            margin: 0.5em 0em;
+            font-size: 22px;
+            font-weight: 100;
+            color: #45a1de;
+        }
+        p.line{
+            margin: 0.5em;
+        }
+        span.prop{
+            width:150px;
+            display: inline-block;
+            font-style: italic;
+            font-weight: 100;
+            color: #45a1de;
+        }
+        .btn{
+            background-color: #45a1de;
+            color: #fff;
+            padding:8px 20px;
+            border-radius:6px;
+        }
+        form {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #45a1de;
+            border-radius: 6px;
+        }
+        form input[type="text"],input[type="file"]{
+            display: block;
+            margin-bottom: 0.5em;
+        }
+    </style>
+    <script>
+        function keyvalue_line(key,val){
+            if (key=='Image'){
+                var html =  '<p class="line"><span class="prop">'+key+'</span><span class="val">'
+                var img = '';
+                if (val != '' ){
+                    img='<img src="'+val+'" />';
+                }
+                html+=img+'</span></p>'
+                return html;
+            }
+            return '<p class="line"><span class="prop">'+key+'</span><span class="val">'+val+'</span></p>'
+        }
+        function render_bkstu_obj(obj){
+            var bound=$('<div></div>');
+            bound.append($(keyvalue_line('Student Name',obj.name)));
+            bound.append($(keyvalue_line('Image',obj.ava)));
+
+            function render_bkstu_schedule(sc){
+                bound.append($(keyvalue_line('Schedule status',sc.status)));
+                if (sc.status=='loaded before'){
+                    bound.append($(keyvalue_line('Last updated',sc.last_updated)));
+                } else {
+                    sc.details.forEach(function(e) {
+                        if (e.details.length > 0) {
+                            bound.append($(keyvalue_line('Semester code', e.hoc_ki)));
+                        }
+                    });
+                }
+            }
+            render_bkstu_schedule(obj.schedule);
+            return bound;
+        }
+
+        $(document).ready(function(){
+            $('#search_one_student').click(function(e){
+                $('#bk_search_form').submit(function(e){
+                    var url=$(this).attr('action');
+                    var data=$(this).serializeArray();
+                    $.ajax({
+                        url:url,
+                        type:'post',
+                        data:data
+                    }).done(function(resp){
+                        $('#rightPanel').append(render_bkstu_obj(resp));
+                    });
+                    e.preventDefault();
+                });
+            });
+        });
+
+    </script>
+
+    <div class="panel" id="leftPanel">
+        <form name="bk_search_form" id="bk_search_form" action="/bkstuinfo" method="post" class="form">
+            <div>
+                <p class="form-title">Search one BK student's resource</p>
+                <p style="margin: 0.5em 0em;">Please input your HCMUT IDs:</p>
+                <input type="text" name="mssv"/>
+                <button class="btn" id="search_one_student">Search</button>
+            </div>
+        </form>
+        <form name="bk_update_stu_ava" id="bk_update_stu_ava" action="/bkstuinfo/update-ava" method="post" class="form" enctype="multipart/form-data">
+            <div>
+                <p class="form-title">Update BK student's avatar</p>
+                <p style="margin: 0.5em 0em;">Please input your HCMUT IDs:</p>
+                <input type="text" name="mssv"/>
+                <p style="margin: 0.5em 0em;">Your image:</p>
+                <input type="file" name="img"/>
+                <input type="submit" class="btn" id="upload_img" value="Search"></input>
+            </div>
+        </form>
+    </div>
+    <div class="panel" id="rightPanel">
+
+    </div>
 </body>
 </html>

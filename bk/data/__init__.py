@@ -5,6 +5,7 @@ from google.appengine.ext import ndb
 class StudentModel(ndb.Model):
     student_id = ndb.StringProperty(repeated=False)
     student_name = ndb.StringProperty()
+    student_avatar=ndb.TextProperty(default=None)
     schedule_last_updated = ndb.DateTimeProperty(auto_now_add=True)
     exam_last_updated = ndb.DateTimeProperty(auto_now_add=True)
 

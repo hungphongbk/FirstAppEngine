@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import base64
 import json
 import re
 import urllib
@@ -6,7 +7,6 @@ import urllib
 import webapp2
 
 from bk.data import StudentModel
-
 from bk.data.list import ScheduleList, ExamList
 from bk.util import send_post_request, BKException
 
@@ -19,6 +19,7 @@ class StuInfoObject(object):
         self.__stu_name = self.name = ''
         self.__schedule_last = None
         self.__exam_last = None
+        self.ava = ''
 
     def get_name(self):
         svs = StudentModel.find(self.mssv, 'bk')
@@ -26,6 +27,7 @@ class StuInfoObject(object):
             self.__stu_name = svs[0].student_name
             self.__schedule_last = svs[0].schedule_last_updated.isoformat()
             self.__exam_last = svs[0].exam_last_updated.isoformat()
+            self.ava = svs[0].student_avatar
 
         # fix dieu kien tra ve du lieu day du hay thoi gian cap nhat cuoi
         if len(self.__stu_name) == 0:
@@ -58,6 +60,15 @@ class StuInfoObject(object):
             self.schedule = ScheduleList(mssv=self.mssv, status='loaded before')
             self.exam = ExamList(mssv=self.mssv, status='loaded before')
 
+    def set_ava(self, ava):
+        svs = StudentModel.find(self.mssv, 'bk')
+        if len(svs) > 0:
+            sv = svs[0]
+            sv.student_avatar = str(ava)
+            sv.put()
+
+            self.ava = str(ava)
+
 
 class StuInfo(webapp2.RequestHandler):
     def post(self):
@@ -75,4 +86,26 @@ class StuInfo(webapp2.RequestHandler):
             self.response.write("{ \"mssv\" : \"not found\" }")
 
 
-app = webapp2.WSGIApplication([('/stuinfo', StuInfo)], debug=True)
+class StuInfoUploadAva(webapp2.RequestHandler):
+    def post(self):
+        print 'catched'
+        self.response.headers['Content-Type'] = 'application/json'
+
+        mssv = self.request.get('mssv', '')
+        img = self.request.POST.get('img', None)
+        current = StuInfoObject(mssv=mssv)
+
+        if img is not None:
+            print img
+            img_type = img.type
+            img_enc = base64.b64encode(img.file.read())
+            img_enc_struct = "data:%s;base64,%s" % (img_type, img_enc)
+        else:
+            img_enc_struct = ""
+
+        current.set_ava(img_enc_struct)
+        self.response.write("{'upload_status':'OK'}")
+
+
+app = webapp2.WSGIApplication([('/bkstuinfo', StuInfo),
+                               ('/bkstuinfo/update-ava', StuInfoUploadAva)], debug=True)
