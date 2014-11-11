@@ -7,7 +7,7 @@ import urllib
 import webapp2
 
 from bk.data import StudentModel
-from bk.data.list import ScheduleList, ExamList
+from bk.data.list import ScheduleList, ExamList, SummaryList
 from bk.util import send_post_request, BKException
 
 
@@ -43,22 +43,23 @@ class StuInfoObject(object):
 
                     self.schedule = ScheduleList(mssv=self.mssv)
                     self.exam = ExamList(mssv=self.mssv)
+                    self.summary = SummaryList(mssv=self.mssv)
                 else:
                     self.name = 'not found'
-                    # self.name = base64.b64encode(self.name)
+                    return
             except BKException, e:
-                # self.name = base64.b64encode(str(e))
                 self.name = str(e)
 
             # store thong tin sv moi vao db
             sv = StudentModel(parent=StudentModel.stu_key('bk'),
                               student_id=self.mssv,
                               student_name=self.name)
-            sv.put()
+            #sv.put()
         else:
             self.name = self.__stu_name
             self.schedule = ScheduleList(mssv=self.mssv, status='loaded before')
             self.exam = ExamList(mssv=self.mssv, status='loaded before')
+            self.summary = SummaryList(mssv=self.mssv, status='loaded before')
 
     def set_ava(self, ava):
         svs = StudentModel.find(self.mssv, 'bk')
@@ -86,12 +87,19 @@ class StuInfo(webapp2.RequestHandler):
             self.response.write("{ \"mssv\" : \"not found\" }")
 
 
-class StuInfoUploadAva(webapp2.RequestHandler):
+class StuInfoUpdate(webapp2.RequestHandler):
     def post(self):
+        typ = self.request.get('type', '')
+        if len(typ) == 0:
+            self.error(400)
+        elif typ == 'ava':
+            self.upload_ava()
+
+    def upload_ava(self):
         print 'catched'
         self.response.headers['Content-Type'] = 'application/json'
 
-        mssv = self.request.get('mssv', '')
+        mssv = self.request.POST.get('mssv', '')
         img = self.request.POST.get('img', None)
         current = StuInfoObject(mssv=mssv)
 
@@ -108,4 +116,4 @@ class StuInfoUploadAva(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([('/bkstuinfo', StuInfo),
-                               ('/bkstuinfo/update-ava', StuInfoUploadAva)], debug=True)
+                               ('/bkstuinfo/update', StuInfoUpdate)], debug=True)

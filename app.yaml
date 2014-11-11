@@ -16,9 +16,17 @@ handlers:
 - url: /bkstuinfo/.*
   script: bk.stuinfo.app
 
+#- url: /stats.*
+#  script: $PYTHON_LIB/google/appengine/ext/appstats/ui.py
+
 
 libraries:
 - name: webapp2
   version: latest
 - name: lxml
   version: latest
+
+#admin_console:
+#  pages:
+#  - name: Appstats
+#    url: /stats

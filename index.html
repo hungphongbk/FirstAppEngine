@@ -13,6 +13,30 @@
             padding:0;
             white-space: nowrap;
         }
+        div.template{
+            display: none;
+        }
+        div.box {
+            width: 40%;
+            float: left;
+            margin: 12px;
+        }
+        .stu-info .ava{
+            height: 80px;
+            width: 80px;
+            float: left;
+            display: block;
+            margin-right: 1em;
+        }
+        .stu-info .stu-name{
+            margin: 0;
+            font-family: 'Helvetica Neue',Helvetica;
+            font-size: 1.6em;
+            font-style: normal;
+            font-weight: normal;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
         div.panel{
             float:left;
             height:100%;
@@ -71,6 +95,12 @@
             return '<p class="line"><span class="prop">'+key+'</span><span class="val">'+val+'</span></p>'
         }
         function render_bkstu_obj(obj){
+            var $bound = $('.template.stu-info').clone()
+            $bound.css('display','block');
+            $bound.find('.stu-name').text(obj.name);
+            $bound.find('.ava').attr('src',obj.ava)
+            return $bound;
+            /*
             var bound=$('<div></div>');
             bound.append($(keyvalue_line('Student Name',obj.name)));
             bound.append($(keyvalue_line('Image',obj.ava)));
@@ -89,6 +119,7 @@
             }
             render_bkstu_schedule(obj.schedule);
             return bound;
+            */
         }
 
         $(document).ready(function(){
@@ -109,7 +140,10 @@
         });
 
     </script>
-
+    <div class="template stu-info box">
+        <img class="ava"/>
+        <p class="stu-name"></p>
+    </div>
     <div class="panel" id="leftPanel">
         <form name="bk_search_form" id="bk_search_form" action="/bkstuinfo" method="post" class="form">
             <div>
@@ -119,14 +153,14 @@
                 <button class="btn" id="search_one_student">Search</button>
             </div>
         </form>
-        <form name="bk_update_stu_ava" id="bk_update_stu_ava" action="/bkstuinfo/update-ava" method="post" class="form" enctype="multipart/form-data">
+        <form name="bk_update_stu_ava" id="bk_update_stu_ava" action="/bkstuinfo/update?type=ava" method="post" class="form" enctype="multipart/form-data">
             <div>
                 <p class="form-title">Update BK student's avatar</p>
                 <p style="margin: 0.5em 0em;">Please input your HCMUT IDs:</p>
                 <input type="text" name="mssv"/>
                 <p style="margin: 0.5em 0em;">Your image:</p>
                 <input type="file" name="img"/>
-                <input type="submit" class="btn" id="upload_img" value="Search"></input>
+                <input type="submit" class="btn" id="upload_img" value="Upload" />
             </div>
         </form>
     </div>
