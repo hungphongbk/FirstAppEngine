@@ -58,6 +58,9 @@ class ScheduleList:
 
         if self.status == 'not yet':
             self.__download(mssv)
+        elif self.status == 'newest':
+            self.last_updated = last_time
+            self.details = []
         else:
             self.last_updated = last_time
 

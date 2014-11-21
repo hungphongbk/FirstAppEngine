@@ -2,9 +2,13 @@
   <dictionary name="HUNGPHONGPC">
     <words>
       <w>datastore</w>
+      <w>hungphongpc</w>
       <w>hùng</w>
       <w>mssv</w>
       <w>phong</w>
+      <w>rawdata</w>
+      <w>scfile</w>
+      <w>struct</w>
       <w>trương</w>
     </words>
   </dictionary>

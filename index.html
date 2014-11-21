@@ -145,7 +145,7 @@
         <p class="stu-name"></p>
     </div>
     <div class="panel" id="leftPanel">
-        <form name="bk_search_form" id="bk_search_form" action="/bkstuinfo" method="post" class="form">
+        <form name="bk_search_form" id="bk_search_form" action="/bkstuinfo?param=all" method="post" class="form">
             <div>
                 <p class="form-title">Search one BK student's resource</p>
                 <p style="margin: 0.5em 0em;">Please input your HCMUT IDs:</p>
@@ -161,6 +161,16 @@
                 <p style="margin: 0.5em 0em;">Your image:</p>
                 <input type="file" name="img"/>
                 <input type="submit" class="btn" id="upload_img" value="Upload" />
+            </div>
+        </form>
+        <form name="bk_upload_offline_sc" id="bk_upload_offline_sc" action="/bkstuinfo/update?type=offline_sc" method="post" class="form" enctype="multipart/form-data">
+            <div>
+                <p class="form-title">Update BK Offline Schedule data</p>
+                <p style="margin: 0.5em 0em;">Please input your HCMUT IDs:</p>
+                <input type="text" name="mssv"/>
+                <p style="margin: 0.5em 0em;">Your file:</p>
+                <input type="file" name="scfile"/>
+                <input type="submit" class="btn" id="upload_scfile" value="Upload" />
             </div>
         </form>
     </div>
